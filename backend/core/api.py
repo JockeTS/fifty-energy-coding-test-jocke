@@ -1,10 +1,12 @@
 from ninja import NinjaAPI
-from core.models import User, Sensor
-from core.schemas import SensorSchema, SensorOverviewSchema, SensorDetailSchema, SensorCreateSchema, SensorUpdateSchema
+from core.models import User, Sensor, Reading
+from core.schemas import SensorSchema, SensorOverviewSchema, SensorDetailSchema, SensorCreateSchema, SensorUpdateSchema, ReadingSchema, ReadingCreateSchema
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 from ninja.errors import HttpError
+from django.utils.dateparse import parse_datetime
+from django.http import HttpResponseBadRequest
 
 api = NinjaAPI()
 
@@ -22,7 +24,7 @@ def hello(request):
 
 # SENSOR 
 
-# GET - get all sensors
+# GET - get all sensors (filter by query)
 @api.get("/sensors/", response=list[SensorOverviewSchema])
 def get_sensors(request):
     # sensors = Sensor.objects.all()
@@ -63,7 +65,7 @@ def create_sensor(request, data: SensorCreateSchema):
             description=data.description
         )
     except IntegrityError:
-        raise HttpError(400, f"A sensor with the name '{data.name} already exists.")
+        raise HttpError(400, f"A sensor with the name '{data.name}' already exists.")
 
     return sensor
 
@@ -85,7 +87,7 @@ def update_sensor(request, sensor_id: int, data: SensorUpdateSchema):
     try:
         sensor.save()
     except IntegrityError:
-        raise HttpError(400, f"A sensor with the name '{data.name} already exists.")
+        raise HttpError(400, f"A sensor with the name '{data.name}' already exists.")
 
     # Display changes
     return sensor
@@ -100,4 +102,43 @@ def delete_sensor(request, sensor_id: int):
     return {"success": True, "message": f"Sensor {sensor_id} deleted."}
 
 # READING
-# TODO
+
+# GET - get all readings (filter by from:timestamp - to:timestamp)
+@api.get("/sensors/{sensor_id}/readings/", response=list[ReadingSchema])
+def get_sensors(request, sensor_id: int):
+    # Sensor to get readings for
+    sensor = get_object_or_404(Sensor, id=sensor_id, owner_id=1)
+
+    timestamp_from = str(request.GET.get("timestamp_from", ""))
+    timestamp_to = str(request.GET.get("timestamp_to", ""))
+
+    readings = Reading.objects.filter(sensor=sensor)
+
+    # Filter using timestamps if valid format
+    try:
+        if timestamp_from:
+            readings = readings.filter(timestamp__gte=parse_datetime(timestamp_from))
+        if timestamp_to:
+            readings = readings.filter(timestamp__lte=parse_datetime(timestamp_to))
+    except ValueError:
+        return HttpResponseBadRequest("Invalid timestamp_from format. Use YYYY-MM-DD or ISO 8601.")
+
+    # return readings
+    return readings
+
+# POST - create a new reading
+@api.post("/sensors/{sensor_id}/readings/", response=ReadingSchema)
+def create_sensor(request, sensor_id: int, data: ReadingCreateSchema):
+    sensor = get_object_or_404(Sensor, id=sensor_id, owner_id=1)
+
+    try:
+        reading = Reading.objects.create(
+            sensor=sensor,
+            temperature=data.temperature,
+            humidity=data.humidity,
+            timestamp=data.timestamp
+        )
+    except IntegrityError:
+        raise HttpError(400, f"A reading with sensor '{sensor_id}' and timestamp '{data.timestamp}' already exists.")
+
+    return reading

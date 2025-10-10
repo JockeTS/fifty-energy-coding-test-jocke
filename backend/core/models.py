@@ -30,6 +30,7 @@ class Reading(models.Model):
             models.Index(fields=["sensor", "timestamp"])
         ]
         # Sensor - timestamp pairs must be unique
-        constraints = [
-            models.UniqueConstraint(fields=["sensor", "timestamp"], name="unique_sensor_timestamp")
-        ]
+        unique_together = ("sensor", "timestamp")
+        # constraints = [
+        #     models.UniqueConstraint(fields=["sensor", "timestamp"], name="unique_sensor_timestamp")
+        # ]

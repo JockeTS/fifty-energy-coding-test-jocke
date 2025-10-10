@@ -2,12 +2,20 @@ from ninja import Schema
 from typing import List, Optional
 from datetime import datetime
 
+# READING
 class ReadingSchema(Schema):
     id: int
+    sensor_id: int
     temperature: float
     humidity: float
     timestamp: datetime
 
+class ReadingCreateSchema(Schema):
+    temperature: float
+    humidity: float
+    timestamp: datetime
+
+# SENSOR
 class SensorSchema(Schema):
     id: int
     name: str
