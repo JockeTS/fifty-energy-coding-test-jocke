@@ -6,10 +6,6 @@ class User(models.Model):
     username = models.CharField(max_length=150, unique=True)
     password = models.CharField(max_length=128) # for hashed passwords
 
-    # Return object's username when print() or str() is called
-    def __str__(self):
-        return self.username
-    
 class Sensor(models.Model):
     id = models.AutoField(primary_key=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sensors')
@@ -17,9 +13,10 @@ class Sensor(models.Model):
     description = models.TextField(null=True, blank=True)
     model = models.CharField(max_length=150)
 
-    def __str__(self):
-        return self.name
-    
+    # Sensor names should be unique for users but not globally
+    class Meta:
+        unique_together = ("owner", "name")
+
 class Reading(models.Model):
     id = models.AutoField(primary_key=True)
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE, related_name='readings')
