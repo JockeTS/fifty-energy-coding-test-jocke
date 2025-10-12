@@ -1,15 +1,20 @@
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 from django.db import models
 
-class User(models.Model):
-    id = models.AutoField(primary_key=True)
-    email = models.EmailField(unique=True)
-    username = models.CharField(max_length=150, unique=True)
-    password = models.CharField(max_length=128) # for hashed passwords
+# class User(models.Model):
+#     id = models.AutoField(primary_key=True)
+#     email = models.EmailField(unique=True)
+#     username = models.CharField(max_length=150, unique=True)
+#     password = models.CharField(max_length=128) # for hashed passwords
+
+class User(AbstractUser):
+    pass
 
 class Sensor(models.Model):
     id = models.AutoField(primary_key=True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sensors')
-    name = models.CharField(max_length=150, unique=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sensors')
+    name = models.CharField(max_length=150)
     description = models.TextField(null=True, blank=True)
     model = models.CharField(max_length=150)
 

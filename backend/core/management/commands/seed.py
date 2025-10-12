@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
-from core.models import User, Sensor, Reading
+from core.models import Sensor, Reading
 import csv
 from datetime import datetime
 
@@ -9,13 +10,15 @@ class Command(BaseCommand):
         # Flush the database (so id:s start from 1)
         call_command('flush', '--no-input')
 
+        User = get_user_model()
+
         # Delete child models first
         Reading.objects.all().delete()
         Sensor.objects.all().delete()
         User.objects.all().delete()
 
         # Create user(s) and sensors
-        user1 = User.objects.create(email="jocke@fifty.se", username="jocke", password="test123")
+        user1 = User.objects.create_user(email="jocke@fifty.se", username="jocke", password="test123")
 
         Sensor.objects.create(owner=user1, name="device-001", model="EnviroSense")
         Sensor.objects.create(owner=user1, name="device-002", model="ClimaTrack")
