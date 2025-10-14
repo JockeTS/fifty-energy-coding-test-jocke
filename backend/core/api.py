@@ -50,7 +50,7 @@ def get_sensors(request):
 
     # Pagination
     page = int(request.GET.get("page", 1))
-    page_size = int(request.GET.get("page_size", 5))
+    page_size = int(request.GET.get("page_size", 10))
 
     paginator = Paginator(sensors, page_size)
     page_obj = paginator.get_page(page)
