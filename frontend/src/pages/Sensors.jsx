@@ -1,45 +1,23 @@
 // src/Sensors.js
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import AddSensorModal from "./modals/AddSensorModal";
+import SensorDetailModal from "./modals/SensorDetailModal";
 
-const API_URL = "http://web:8000/api";
-
-/*
-export async function apiFetch(endpoint, options = {}) {
-  const token = localStorage.getItem("access_token");
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...options.headers,
-  };
-
-  const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
-
-  if (!res.ok) {
-    throw new Error(`API error: ${res.status}`);
-  }
-
-  return await res.json();
-}
-*/
-
-export default function Sensors() {
+export default function Sensors( {onLogout} ) {
   const [sensors, setSensors] = useState([]);
   const [error, setError] = useState("");
   const [selectedSensor, setSelectedSensor] = useState(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // const [query, setQuery] = useState("");
-  // const [page, setPage] = useState(1);
-  // const [pageSize, setPageSize] = useState(10);
-
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
   const [pageSize, setPageSize] = useState(Number(searchParams.get("page_size")) || 10);
 
   const [total, setTotal] = useState(0);
+
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // Update URL to match query / filters
   useEffect(() => {
@@ -53,14 +31,6 @@ export default function Sensors() {
   useEffect(() => {
     async function load() {
       const token = localStorage.getItem("access_token");
-
-      /*
-      const headers = {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...options.headers,
-      };
-      */
 
       const params = new URLSearchParams({
         q: query,
@@ -77,7 +47,6 @@ export default function Sensors() {
 
         const data = await res.json();
 
-        // const data = await apiFetch("/sensors/");
         setSensors(data);
         setTotal(data.count);
       } catch (err) {
@@ -89,24 +58,31 @@ export default function Sensors() {
   }, [query, page, pageSize]);
 
   if (error) return <p style={{ color: "red" }}>{error}</p>;
-  if (!sensors.length) return <p>Loading sensors...</p>;
+  // if (!sensors.length) return <p>Loading sensors...</p>;
 
   return (
     <div>
       <h2>Sensors</h2>
 
-      <div className="sensor-table-container">
-        <h2>Sensors</h2>
+      <button onClick={onLogout} className="logout-btn">Logout</button>
 
-        {/* Filter bar */}
+      <div className="sensor-table-container">
+        {/* Search bar, add sensor button, filter bar */}
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1rem" }}>
           <input
             type="text"
-            placeholder="Search sensors..."
+            placeholder="Search"
             value={query}
             onChange={(e) => { setPage(1); setQuery(e.target.value); }}
-            style={{ padding: "0.5rem", width: "60%" }}
+            style={{ padding: "0.5rem", width: "30%" }}
           />
+
+            <button
+              className="add-sensor-btn"
+              onClick={() => setShowAddModal(true)}
+            >
+              + Add Sensor
+          </button>
 
           <select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))}>
             {[5, 10, 25, 50].map(n => (
@@ -115,6 +91,7 @@ export default function Sensors() {
           </select>
         </div>
 
+        {/* Table for displaying sensors */}
         <table className="sensor-table">
           <thead>
             <tr>
@@ -137,33 +114,21 @@ export default function Sensors() {
                 </td>
               </tr>
             ))}
-
-            {selectedSensor && (
-              <div style={{
-                position: 'fixed',
-                top: 0, left: 0,
-                width: '100vw', height: '100vh',
-                backgroundColor: 'rgba(0,0,0,0.5)',
-                display: 'flex', justifyContent: 'center', alignItems: 'center',
-                zIndex: 1000
-              }}>
-                <div style={{
-                  background: 'white',
-                  padding: '2rem',
-                  borderRadius: '8px',
-                  maxWidth: '500px',
-                  width: '90%'
-                }}>
-                  <h2>{selectedSensor.name}</h2>
-                  <p><strong>Model:</strong> {selectedSensor.model}</p>
-                  <p><strong>Description:</strong> {selectedSensor.description}</p>
-                  <button onClick={() => setSelectedSensor(null)}>Close</button>
-                </div>
-              </div>
-            )}
           </tbody>
         </table>
       </div>
+
+      {/* Modals */}
+      <AddSensorModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSensorAdded={(newSensor) => setSensors((prev) => [...prev, newSensor])}
+      />
+
+      <SensorDetailModal 
+        sensor={selectedSensor} 
+        onClose={() => setSelectedSensor(null)} 
+      />
 
       {/* Pagination */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem", gap: "1rem" }}>

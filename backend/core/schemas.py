@@ -24,11 +24,13 @@ class SensorSchema(Schema):
     owner_id: int
 
 class SensorOverviewSchema(Schema):
+    id: int
     name: str
     description: Optional[str] = None
     model: str
 
 class SensorDetailSchema(Schema):
+    id: int
     name: str
     description: Optional[str] = None
     model: str
