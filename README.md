@@ -1,5 +1,10 @@
 # fifty-energy-coding-test-jocke
-1. In the root directory, create a .env file with the following contents:
+
+## Link to OpenAPI docs:
+http://localhost:8000/api/docs
+
+## Run the project
+1. In the root directory, create an .env file with the following contents:
 POSTGRES_DB=<pgname>
 POSTGRES_USER=<pguser>
 POSTGRES_PASSWORD=<pgpassword>
@@ -8,3 +13,7 @@ POSTGRES_PASSWORD=<pgpassword>
 * make up           - Build and run containers
 * make migrate      - Run database migrations
 * make seed         - Populate the database
+
+3. Go to http://localhost:3000/login to either:
+* log in with pre-existing user (username: jocke, password: test123) or register a new user
+* currently supported routes: /login, /register, /sensors

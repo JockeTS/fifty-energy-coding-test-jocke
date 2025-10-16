@@ -13,6 +13,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.exceptions import AuthenticationFailed
+from ninja.responses import Response
 
 api = NinjaAPI()
 
@@ -39,7 +40,7 @@ def hello(request):
 @api.get("/sensors/", auth=JWTAuth(), response=list[SensorOverviewSchema])
 def get_sensors(request):
     user = request.auth
-    sensors = Sensor.objects.filter(owner=user)
+    sensors = Sensor.objects.filter(owner=user).order_by("id")
     # sensors = Sensor.objects.filter(owner_id=1)
 
     # Search query
@@ -119,7 +120,8 @@ def delete_sensor(request, sensor_id: int):
 
     sensor.delete()
 
-    return {"success": True, "message": f"Sensor {sensor_id} deleted."}
+    # return {"success": True, "message": f"Sensor {sensor_id} deleted."}
+    return Response(None, status=204)
 
 # READING
 
