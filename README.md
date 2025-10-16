@@ -13,6 +13,7 @@ POSTGRES_PASSWORD=<pgpassword>
 * make up           - Build and run containers
 * make migrate      - Run database migrations
 * make seed         - Populate the database
+* make test         - Run unit tests
 
 3. Go to http://localhost:3000/login to either:
 * log in with pre-existing user (username: jocke, password: test123) or register a new user

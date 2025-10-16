@@ -6,6 +6,7 @@ up:
 migrate:
 	docker compose exec web python manage.py migrate
 
+# Run unit tests
 test:
 	docker compose exec web pytest
 
