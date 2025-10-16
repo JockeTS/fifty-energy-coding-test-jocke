@@ -6,15 +6,15 @@ services:
     container_name: db
     restart: always
     environment:
-      POSTGRES_DB: pgname # database name
-      POSTGRES_USER: pguser # name of database user
-      POSTGRES_PASSWORD: pgpassword # password for database user
+      POSTGRES_DB: ${POSTGRES_DB} # database name
+      POSTGRES_USER: ${POSTGRES_USER} # name of database user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # password for database user
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pguser"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
